@@ -10,40 +10,8 @@ from skimage import data
 from skimage.metrics import structural_similarity as ssim
 from skimage.transform import rescale
 
-# %%% 1.1. MESSAGE COMPRESSION/BINARIZATION AND INVERSE
-
-
-def stringtobin(mes):
-    '''Input: message (str). This is changed to binary by using ord() to get
-    its ASCII values (int), then we unpackbits and get an array containg the
-    message in bits. Output: binary message (1D 0/1 uint8 array) .'''
-
-    binmes = np.zeros(len(mes), dtype='uint8')  # Array of mes length
-
-    # Then we introduce every ASCII value of the mes to binmes
-    for i in range(len(mes)):
-        binmes[i] = ord(mes[i])
-
-    # Finally we unpack the integer ASCII values
-    binmes = np.unpackbits(binmes)
-    # to its corresponding bits
-    return binmes
-
-
-def bintostring(binmes):
-    '''This is the inverse function to stringtobin. Input: message in bin num
-    (array). Then we packbits, get integer which correspond to ASCII values.
-    Finally, transform this integers to characters by means of chr() and join
-    them, which means that we recovered the original message. Output: original
-    message (str).'''
-
-    # bin to integer which must be the ASCII values
-    integs = np.packbits(binmes)
-
-    # Finally we return the original message by turning integers to characters
-    # with chr() and joining this characters
-    return ''.join(chr(integs[i]) for i in range(len(integs)))
-
+# from Huffman-tree import Node
+from functions import bintostring, stringtobin
 
 # %%% 1.2. MESSAGE ENCODING PROCESS
 '''We will implement a general method for every image to encode a message.
@@ -244,11 +212,11 @@ def encoding(im, binarymes, sqlen):
 
 
 # %%% 1.3. MESSAGE DECODING PROCESS
-    '''We will implement a general method for every image to decode a message.
-    Mainly we have to take into account that sqlen used must be the same than
-    the one used to encode the message, and that we have to previously know
-    the secret message lenght, otherwise we could get in big trouble. It could
-    be encoded in the image, or sent via an encryted channel.'''
+'''We will implement a general method for every image to decode a message.
+Mainly we have to take into account that sqlen used must be the same than
+the one used to encode the message, and that we have to previously know
+the secret message lenght, otherwise we could get in big trouble. It could
+be encoded in the image, or sent via an encryted channel.'''
 
 
 def decoding(im, binarymeslen, sqlen):
