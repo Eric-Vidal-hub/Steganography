@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Nov 26 19:04:51 2023
-@author: Eric Vidal Marcos
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data
