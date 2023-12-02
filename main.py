@@ -9,8 +9,8 @@ from skimage import data
 from skimage.metrics import structural_similarity as ssim
 from skimage.transform import rescale
 
-from functions import bintostring, stringtobin, encoding, decoding
-
+# from functions import bintostring, stringtobin, encoding, decoding
+from functions_refactored import bintostring, stringtobin, encoding, decoding
 
 # %% 2. HUFFMAN TREE CODE
 
@@ -368,7 +368,7 @@ revealsec = revealsecflat.reshape(np.shape(secim))
 db_secim = np.double(secim*255)
 db_revealsec = np.double(revealsec)
 sec_ssim = ssim(db_secim, db_revealsec,
-                data_range=db_revealsec.max() - db_revealsec.min())
+                data_range=255.0)
 
 print('The SSIM comparing Original Sec Im and Revealed Sec Im is:', sec_ssim)
 print('')
@@ -524,7 +524,7 @@ revealsec = revealsecflat.reshape(np.shape(secim))
 db_secim = np.double(secim*255)
 db_revealsec = np.double(revealsec)
 sec_ssim = ssim(db_secim, db_revealsec,
-                data_range=db_revealsec.max() - db_revealsec.min())
+                data_range=255.0)
 
 print('The SSIM comparing Original Sec Im and Revealed Sec Im is:', sec_ssim)
 print('')
@@ -647,20 +647,18 @@ recons = (recons-np.min(recons))/(np.max(recons)-np.min(recons))
 revealsec = revealsecflat.reshape(np.shape(secim))
 
 db_normim = np.double(im)/np.max(im)
-cover_ssim = ssim(db_normim, steg, data_range=steg.max() -
-                  steg.min(), multichannel=True, channel_axis=2)
+cover_ssim = ssim(db_normim, steg, data_range= 255.0, multichannel=True, channel_axis=2)
 print('The SSIM comparing Cover Im and Stego Im is:', cover_ssim)
 
 db_steg = np.double(steg)
 db_recons = np.double(recons)
-steg_ssim = ssim(db_steg, db_recons, data_range=db_recons.max() -
-                 db_recons.min(), multichannel=True, channel_axis=2)
+steg_ssim = ssim(db_steg, db_recons, data_range=255.0 , multichannel=True, channel_axis=2)
 print('The SSIM comparing Stego Im and Reconstructed Im is:', steg_ssim)
 
 db_secim = np.double(secim*255)
 db_revealsec = np.double(revealsec)
 sec_ssim = ssim(db_secim, db_revealsec,
-                data_range=db_revealsec.max() - db_revealsec.min())
+                data_range=255.0)
 print('The SSIM comparing Original Sec Im and Revealed Sec Im is:', sec_ssim)
 
 
