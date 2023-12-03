@@ -19,8 +19,8 @@ from skimage.metrics import structural_similarity as ssim
 from skimage.transform import rescale
 from collections import Counter
 
-from functions import bintostring, stringtobin, encoding, decoding
-# from functions_refactored import bintostring, stringtobin, encoding, decoding
+# from functions import bintostring, stringtobin, encoding, decoding
+from functions_refactored import bintostring, stringtobin, encoding, decoding
 
 # %% 2. HUFFMAN TREE CODE
 # Huffman static encoding: codifying and compressing binary data

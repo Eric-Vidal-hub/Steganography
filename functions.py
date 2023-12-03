@@ -5,13 +5,13 @@ from skimage.metrics import structural_similarity as ssim
 
 def stringtobin(mes):
     '''
-    Converts a string to a binary array.
-    Convert the string to its ASCII values (int),
-    then we unpackbits and get an array containg the
-    message in bits (0/1).
-    Inputs:
+    Converts a string to its ASCII values (int), then unpackbits to obtain an
+    array containg the message in bits (0/1).
+
+    Args:
         mes(str): message
-    Outputs:
+
+    Retrurns:
         binmes(1DArray[uint8]): binary message
     '''
     length = len(mes)
@@ -23,13 +23,22 @@ def stringtobin(mes):
 
 def bintostring(binmes):
     '''
-    Inverse function of stringtobin.
-    Packbits, thus get the ASCII values (int),
-    then transform this into characters and join them.
-    Inputs:
-        binmes(1DArray[uint8]): binary message
-    Outputs:
-        mes(str): message
+    Check if the square length fits the image dimensions.
+
+    Args:
+        nrow (int): The number of rows in the image.
+        ncol (int): The number of columns in the image.
+        sqlen (int): The square length.
+
+    Raises:
+        ValueError: If the square length doesn't fit the image dimensions.
+
+    Examples:
+        # Check if the square length fits the image dimensions
+        num_rows = ...
+        num_cols = ...
+        square_length = ...
+        check_image_dimensions(num_rows, num_cols, square_length)
     '''
     ints = np.packbits(binmes)    # bin to int which are the mes ASCII values
     return ''.join(chr(ints[i]) for i in range(len(ints)))  # ASCII to mes(str)
@@ -41,6 +50,22 @@ def check_image_dimensions(nrow, ncol, sqlen):
 
 
 def check_message_length(maxbits, binmes_len):
+    """
+    Check if the number of bits to be embedded exceeds the image capacity.
+
+    Args:
+        maxbits (int): The maximum number of bits that can be embedded.
+        binmes_len (int): The length of the binary message.
+
+    Raises:
+        ValueError: If message exceeds the image capacity.
+
+    Examples:
+        # Check if the message length exceeds the image capacity
+        maxbits = 1000
+        binmes_len = 1200
+        check_message_length(maxbits, binmes_len)
+    """
     if maxbits < binmes_len:
         raise ValueError('Number of bits to be embedded exceeds capacity of\
                          image')
@@ -52,17 +77,20 @@ def calculate_hashfun(temp, ii, sqlen, jj, kk, ll):
 
 def encoding(im, binmes, sqlen):
     '''
-    Message embedding process via DCT coefficients into 1 layer image.
-    First, it ensures that cover image fits the decided square length
-    and the message length. Then, secret bin message is introduced in the
-    stego image using its DCT coefficients, so the original and stego images
-    look the same.
-    Inputs:
-        im(2D-array): cover image
-        binmes(1D-array): binary message
-        sqlen(int): square length
-    Output:
-        stego(2D-array): stego image
+    Perform message embedding process via DCT coefficients into 1-layer image.
+
+    First, it ensures that the cover image fits the decided square length and
+    message length. Then, the secret binary message is introduced in the stego
+    image using its DCT coefficients, so the original and stego images look
+    the same.
+
+    Args:
+        im (2D-array): The cover image.
+        binmes (1D-array): The binary message.
+        sqlen (int): The square length.
+
+    Returns:
+        2D-array: The stego image.
     '''
     nrow, ncol = np.shape(im)   # Size of the cover image
     check_image_dimensions(nrow, ncol, sqlen)
@@ -128,17 +156,21 @@ def encoding(im, binmes, sqlen):
 
 def decoding(im, binmes_len, sqlen):
     '''
-    Message dembedding process via DCT coefficients into 1 layer image.
-    First, it ensures that cover image fits the received square length
-    and message length. Then, the secret bin message is exctracted from
-    the stego image using its DCT coefficients. Finally, it reconstructs
-    the original image and compares with the stego one.
-    Inputs:
-        im(2D-array): secret image
-        binmes_len(1D-array): binary message length
-        sqlen(int): square length
-    Output:
-        recons(2D-array): reconstructed image
+    Perform message dembedding process via DCT coefficients into 1-layer image.
+
+    First, it ensures that the cover image fits the received square length and
+    message length. Then, the secret binary message is extracted from the
+    stego image using its DCT coefficients. Finally, it reconstructs the
+    original image and compares it with the stego one.
+
+    Args:
+        im (2D-array): The stego image.
+        binmes_len (int): The length of the binary message.
+        sqlen (int): The square length.
+
+    Returns (tuple):
+        secmes(1D-array): The secret message.
+        recons(2D-array): The reconstructed image.
     '''
     nrow, ncol = np.shape(im)
     check_image_dimensions(nrow, ncol, sqlen)
