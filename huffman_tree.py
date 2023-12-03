@@ -1,4 +1,4 @@
-'''Huffman tree implementation for message compression'''
+'''Huffman tree implementation for message compression.'''
 from collections import Counter
 
 

@@ -5,12 +5,17 @@
 @python version: 3.10.10 64-bits
 @title: DCT Steganography
 @description: This code is a Steganography method based on DCT transform. It
-allows to hide a secret message or image into a cover image. The secret message
-or image is hidden by changing the least significant bits of the DCT
-coefficients of the cover image. The secret message or image is recovered by
-extracting the least significant bits of the DCT coefficients of the stego
-image. The secret message or image is hidden by changing the least significant
-bits of the DCT coefficients of the cover image.
+allows to hide a secret bitstring (e.g. message or image) into a cover image.
+This is then encoded with Huffman encoding to reduce the size of the message.
+Then, the secret is embedded using a hash function in the DCT coefficients of
+the cover image. So we have a stego image. The receiver will use the same hash
+function to extract the secret message from the stego image. Finally, the
+secret message is decoded with Huffman decoding to recover the original secret.
+
+In this code, we have 3 examples:
+    1. Characters string
+    2. Secret image
+    3. Secret image with RGB cover image
 """
 import matplotlib.pyplot as plt
 import numpy as np
@@ -118,10 +123,7 @@ plt.show()
 
 
 print('3. SECRET IMAGE WITH RGB COVER')
-im = data.astronaut()
-imR = im[:, :, 0]
-imG = im[:, :, 1]
-imB = im[:, :, 2]
+im = data.astronaut()   # Cover image
 secim = rescale(data.camera(), 0.5, anti_aliasing=False)    # Secret image
 
 secimflat = list(np.uint64((secim*255).flatten()))
@@ -132,77 +134,52 @@ bitsec = np.array([int(i) for i in encod_text], dtype='uint8')
 SQR_SIDE = 8    # Size of the blocks to be processed: Common info
 BINMESLEN = len(bitsec)     # Common info
 
-div = BINMESLEN // 3
-bitsecR = bitsec[:div]
-bitsecG = bitsec[div:(div*2)]
-bitsecB = bitsec[(div*2):]
+DIV = BINMESLEN // 3
+bitsec_parts = [bitsec[:DIV], bitsec[DIV:(DIV*2)], bitsec[(DIV*2):]]
 
-binmeslenR = len(bitsecR)
-binmeslenG = len(bitsecG)
-binmeslenB = len(bitsecB)
-
-
-# R
-# Then we introduce it all to the embedding PROCESS
-stegR = embedding(imR, bitsecR, SQR_SIDE)
-
-# Then we introduce it all to the dembedding PROCESS
-SECMES, reconsR = dembedding(stegR, binmeslenR, SQR_SIDE)
-# create a string from secmes 1D-array to decode thanks to huffman tree
-secmesR = ''.join(str(i) for i in SECMES)
-
-# G
-# Then we introduce it all to the embedding PROCESS
-stegG = embedding(imG, bitsecG, SQR_SIDE)
-
-# Then we introduce it all to the dembedding PROCESS
-SECMES, reconsG = dembedding(stegG, binmeslenG, SQR_SIDE)
-# create a string from secmes 1D-array to decode thanks to huffman tree
-secmesG = ''.join(str(i) for i in SECMES)
-
-# B
-# Then we introduce it all to the embedding PROCESS
-stegB = embedding(imB, bitsecB, SQR_SIDE)
-
-# Then we introduce it all to the dembedding PROCESS
-SECMES, reconsB = dembedding(stegB, binmeslenB, SQR_SIDE)
-# create a string from secmes 1D-array to decode thanks to huffman tree
-secmesB = ''.join(str(i) for i in SECMES)
-
-SECMES = secmesR+secmesG+secmesB  # Finally join the whole secret message str
-
-# ______________________________________________________________________________
-# decod the huffman code of the image
-textdecod = huffman_decoding(SECMES, huffmanhead)
-# ______________________________________________________________________________
-revealsecflat = np.array(textdecod)  # put in a 1D-array
-
-# Ensamble steg and recons layers to RGB images
 steg = np.zeros(np.shape(im))
-steg[:, :, 0] = stegR[:, :]
-steg[:, :, 1] = stegG[:, :]
-steg[:, :, 2] = stegB[:, :]
-
 recons = np.zeros(np.shape(im))
-recons[:, :, 0] = reconsR[:, :]
-recons[:, :, 1] = reconsG[:, :]
-recons[:, :, 2] = reconsB[:, :]
+SECMES_FULL = []
+
+_, _, layers = im.shape
+for i in range(layers):
+    im_part = im[:, :, i]
+    bitsec_part = bitsec_parts[i]
+    binmeslen_part = len(bitsec_part)
+
+    # Then we introduce it all to the embedding PROCESS
+    steg_part = embedding(im_part, bitsec_part, SQR_SIDE)
+
+    # Then we introduce it all to the dembedding PROCESS
+    SECMES_PART, recons_part = dembedding(steg_part, binmeslen_part, SQR_SIDE)
+    # create a string from secmes 1D-array to decode thanks to huffman tree
+    SECMES_JOINT = ''.join(str(i) for i in SECMES_PART)
+
+    steg[:, :, i] = steg_part[:, :]
+    recons[:, :, i] = recons_part[:, :]
+    SECMES_FULL.append(SECMES_JOINT)
+
+SECMES = ''.join(SECMES_FULL)  # Finally join the whole secret message str
+
+
+textdecod = huffman_decoding(SECMES, huffmanhead)
+revealsecflat = np.array(textdecod)  # put in a 1D-array
+revealsec = revealsecflat.reshape(np.shape(secim))
 
 # Due to there are negative values and values sligthly higher than 255,
 # we rescale its values from 0 to 1 doubles values
 steg = (steg-np.min(steg))/(np.max(steg)-np.min(steg))
 recons = (recons-np.min(recons))/(np.max(recons)-np.min(recons))
 
-# and reshape to obtain back again the secret image
-revealsec = revealsecflat.reshape(np.shape(secim))
-
 db_normim = np.double(im)/np.max(im)
-cover_ssim = ssim(db_normim, steg, data_range= 255.0, multichannel=True, channel_axis=2)
+cover_ssim = ssim(db_normim, steg, data_range=255.0, multichannel=True,
+                  channel_axis=2)
 print('The SSIM comparing Cover Im and Stego Im is:', cover_ssim)
 
 db_steg = np.double(steg)
 db_recons = np.double(recons)
-steg_ssim = ssim(db_steg, db_recons, data_range=255.0 , multichannel=True, channel_axis=2)
+steg_ssim = ssim(db_steg, db_recons, data_range=255.0, multichannel=True,
+                 channel_axis=2)
 print('The SSIM comparing Stego Im and Reconstructed Im is:', steg_ssim)
 
 db_secim = np.double(secim*255)
@@ -210,9 +187,7 @@ db_revealsec = np.double(revealsec)
 sec_ssim = ssim(db_secim, db_revealsec,
                 data_range=255.0)
 print('The SSIM comparing Original Sec Im and Revealed Sec Im is:', sec_ssim)
-
-
-# Plot the most important images
+# Plot
 plt.figure(5)
 plt.subplot(231)
 plt.imshow(im)
