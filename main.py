@@ -22,17 +22,18 @@ from collections import Counter
 # from functions import bintostring, stringtobin, encoding, decoding
 from functions_refactored import bintostring, stringtobin, encoding, decoding
 
-# %% 2. HUFFMAN TREE CODE
-# Huffman static encoding: codifying and compressing binary data
 class Node:
-    '''__init__ parameters:
-    prob: probability of the node
-    symbol: character or number which characterizes the node.
-    left: node at its left.
-    right: node at its right.
-    code: depending on the direction the tree goes, 0/1 is assigned to the
-    node. Finally, we obtain a binary string that characterizes its symbol.
     '''
+    Represents a node in a Huffman tree.
+
+    Args:
+        prob: The probability of the node.
+        symbol: The character or number that characterizes the node.
+        left: The node at its left. Default: None.
+        right: The node at its right. Default: None.
+        code: The binary code assigned to the node. Default: ''.
+    '''
+
     def __init__(self, prob, symbol, left=None, right=None):
         self.prob = prob
         self.symbol = symbol
@@ -41,33 +42,21 @@ class Node:
         self.code = ''
 
 
-def calculate_frequency(data_in):
-    '''
-    Returns dictionary of characters (symbols) and its frequencies
-    in the message or image.
-    Input:
-        data(list/str): flatten image (NO array) or message.
-    Output:
-        Counter(dict): keys -> symbols & values -> frequencies.
-    '''
-    return Counter(data_in)
-
-
 # Definition outside the function to restart variable each time we call it
 codes = {}
 
 
 def calculate_codes(node, val=''):
     '''
-    We will use a dictionary for the same reason as before, now each symbol
-    will be associated with a 0/1 string that characterizes it, previously
-    we have associated its frequency instead
-    Input:
+    Calculate the Huffman code for each symbol in the Huffman tree.
+
+    Args:
         node(class variable): node of the Huffman tree.
         val(str): binary code of the node.
             Default: ''. Empty str, because at the beggining the code values
-            of each node are none
-    Output:
+            of each node are none.
+
+    Returns:
         codes(dict): keys -> symbols & values -> binary code.
 '''
     newval = val + str(node.code)
@@ -87,18 +76,19 @@ def output_encoded(data_in, coding):
     '''
     Get the secret message or image written in huffman code
     and compare bits length with and without Huffman tree.
-    Input:
+
+    Args:
         data_in(list/str): flatten image (NO array) or message.
         coding(dict): keys -> symbols & values -> binary code.
-    Output:
+
+    Retruns(tuple):
         string(str): secret message or image written in huffman code.
         None. Print the bits used before and after compression.
     '''
-    encoding_output = [coding[i] for i in data_in]
-    encoded_string = ''.join([str(item) for item in encoding_output])
-
+    # Directly join the strings for encoding_output
+    encoded_string = ''.join(coding[i] for i in data_in)
     # each text character or pixel image is 8 bits length
-    before_compression = len(data_in)*8
+    before_compression = len(data_in) * 8
     after_compression = 0
     symbols = coding.keys()
     for i in symbols:
@@ -106,124 +96,85 @@ def output_encoded(data_in, coding):
         after_compression += count*len(coding[i])
     print('Bits used before compression:', before_compression)
     print('Bits used after compression:', after_compression)
-
     return encoded_string
 
-# _______________________________________________________________________
-#                               HUFFMAN TREE
 
-# Function that compress the message using the  values of each character
-# calculated by the huffman code
+def Huffman_Encoding(data_in):
+    '''
+    Message compression using the values of each character calculated by the
+    Huffman code.
 
+    Args:
+        data_in(list/str): flatten image (NO array) or message.
 
-def Huffman_Encoding(data):
-    '''Input:image or message (list or string). This function compresses the
-    message by calculating the huffman tree and then encodes the message.
-    Output: the encoded message in Huffman code 0/1 (str) and a class variable 
-    node that contains all the huffman tree (node[0]) which is the treetop,
-    respectively.'''
-
-    # obtain the frequency of each character
-    symbol_with_probs = calculate_frequency(data)
-
-    # separate dictionary in characters (symbols) and frequencies
+    Retruns(tuple):
+        coded_output(str): secret message or image written in huffman code.
+        nodes[0](class variable): Huffman tree top. It contains all the
+        information of the others nodes and how they are related.
+    '''
+    symbol_with_probs = Counter(data_in)    # Character's frequency (dict)
     symbols = symbol_with_probs.keys()
-    # frequencies = symbol_with_probs.values()
-
-    # empty list of nodes
-    nodes = []
-
-    # convert all the information of the symbol and frequency in nodes. Each
-    # symbol will become a leaf of the tree.
-    for symbol in symbols:
-        nodes.append(Node(symbol_with_probs[symbol], symbol))
-
-    # Create the huffman tree:
+    nodes = [Node(symbol_with_probs[symbol], symbol) for symbol in symbols]
+    # Huffman tree creation
     while len(nodes) > 1:
-
-        # to define the way of sorting we use the unname function lambda. It
-        # extracts the frequency from the node and sort by least frequency to
-        # most frequency one
+        # Sorting definition with the unnamed function lambda. It extracts the
+        # node frequency and sort it from the least to the most frequent
         nodes = sorted(nodes, key=lambda x: x.prob)
-
-        # we take the two least freq values of the list and assign them as
-        # right node and left node.
+        # Least frequent and assign them as right node and left node.
         right = nodes[0]
         left = nodes[1]
-
-        # Then we give them their associate code value (0 or 1)
+        # Then we associate them a code value (0 or 1)
         left.code = 0
         right.code = 1
-
-        # we merge the two nodes to form a new one, which freq will be the sum of
-        # the other two.
-        # Here we are classifying the structure of the tree by introducing into
-        # a new node which branch is located at its left and which at its right
+        # Merge the two nodes with frequency summed up
         newNode = Node(left.prob+right.prob, left.symbol +
                        right.symbol, left, right)
-
-        # now we remove from the node list the nodes that we already has used
+        # Remove the nodes that we have already merged
         nodes.remove(left)
         nodes.remove(right)
-        # and we introduce the new one
-        nodes.append(newNode)
+        nodes.append(newNode)   # and introduce the new one
 
-    # We start from the top and go down with the auxiliar function 3, so we get
-    # the huffman code of each character
+    # Start from the top and go down toe get the code of each symbol
     huffman_coding = calculate_codes(nodes[0])
-
     # final string with encoded text
-    coded_output = output_encoded(data, huffman_coding)
+    coded_output = output_encoded(data_in, huffman_coding)
+    return coded_output, nodes[0]
 
-    return coded_output,    nodes[0]
-
-
-# _______________________________________________________________________
-# Decoding the Huffman tree:
-
-# Huffman tree is the top node wich contains all the information of the others
-# nodes and how they are related
 
 def huffman_decoding(encod_data, huffmantree):
-    '''Input:message codified (encod_data, str) and Huffman treetop (class node
-    variable which contains all the information of the Huffman tree). This 
-    function decode the message given the huffman tree used to encode the
-    message. Output: decoded message, so corresponding symbols from the 
-    original message (list).'''
+    # sourcery skip: remove-empty-nested-block, remove-redundant-if
+    """
+    Decode the message given the Huffman tree used to encode the message.
 
-    # value of the toptree
+    Args:
+        encod_data (str): The encoded message to be decoded.
+        huffmantree (Node): The top node of the Huffman tree used for encoding.
+
+    Returns:
+        list: The decoded message as a list of symbols.
+    If the original message is:
+    String: convert the list to string.
+    Image: convert the list to array and reshape.
+    """
     tree_head = huffmantree
-
-    # recovered message
     decoded_output = []
-
-    # check the corresponding number of the message, if it is 1 goes left,
-    # if it is 0 goes right
     for i in encod_data:
-        if i == '1':
-            # the new node is the right one
-            huffmantree = huffmantree.right
-        elif i == '0':
-            # the new node is the left one
+        if i == '0':
             huffmantree = huffmantree.left
-
+        elif i == '1':
+            huffmantree = huffmantree.right
         # prove each time, if we are not in a leaf pass if we are in a leaf
         # an error is expected and active the except AttributeError
         try:
-            if (huffmantree.left.symbol == None) and (huffmantree.right.symbol == None):
+            if (
+                huffmantree.left.symbol is None
+                and huffmantree.right.symbol is None
+            ):
                 pass
-        # when arrive at a leaf appends the character of the leaf into the list
         except AttributeError:
             decoded_output.append(huffmantree.symbol)
             huffmantree = tree_head
-
     return decoded_output
-
-# IMPORTANT: the decoded output correspond to a list, this make possible to
-# recover the message. BUT, you must take into account that if the original
-# message is:
-# String: convert the list to string
-# Image: convert the list to array and reshape
 
 
 # %% 3. EXAMPLES WITHOUT HUFFMAN TREE
