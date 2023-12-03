@@ -1,17 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Eric Vidal Marcos
-@supervisor: Dr. Aurelien Coillet
-@python version: 3.10.10 64-bits
-@title: DCT Steganography
-@description: This code is a Steganography method based on DCT transform. It
-allows to hide a secret message or image into a cover image. The secret message
-or image is hidden by changing the least significant bits of the DCT
-coefficients of the cover image. The secret message or image is recovered by
-extracting the least significant bits of the DCT coefficients of the stego
-image. The secret message or image is hidden by changing the least significant
-bits of the DCT coefficients of the cover image.
-"""
+"""Examples of DCT Steganography without encoding for string
+and image as secret messages."""
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage import data
