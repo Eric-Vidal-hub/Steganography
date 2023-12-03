@@ -80,7 +80,7 @@ def output_encoded(data_in, coding):
     return encoded_string
 
 
-def Huffman_Encoding(data_in):
+def huffman_encoding(data_in):
     '''
     Message compression using the values of each character calculated by the
     Huffman code.
@@ -108,12 +108,12 @@ def Huffman_Encoding(data_in):
         left.code = 0
         right.code = 1
         # Merge the two nodes with frequency summed up
-        newNode = Node(left.prob+right.prob, left.symbol +
+        newnode = Node(left.prob+right.prob, left.symbol +
                        right.symbol, left, right)
         # Remove the nodes that we have already merged
         nodes.remove(left)
         nodes.remove(right)
-        nodes.append(newNode)   # and introduce the new one
+        nodes.append(newnode)   # and introduce the new one
 
     # Start from the top and go down toe get the code of each symbol
     huffman_coding = calculate_codes(nodes[0])
@@ -159,15 +159,9 @@ def huffman_decoding(encod_data, huffmantree):
 
 
 # EXAMPLE
-# create the secret image
-im = data.camera()
-
-# flatten the image  to pas to a list
-im = np.uint64(im.flatten())
-im1 = list(im)
-
-# now we use the huffman encoding
-textcod2, huffmantree2 = Huffman_Encoding(im1)
+im = data.camera()  # Secret image
+im = list(np.uint64(im.flatten()))  # Pre process to binarize
+textehcod, hufftree = huffman_encoding(im)
 
 # decod the huffman code of the image
-textdecod2 = huffman_decoding(textcod2, huffmantree2)
+textdecod = huffman_decoding(textehcod, hufftree)

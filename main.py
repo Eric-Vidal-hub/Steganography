@@ -18,9 +18,8 @@ from skimage import data
 from skimage.metrics import structural_similarity as ssim
 from skimage.transform import rescale
 from collections import Counter
-
-# from functions import bintostring, stringtobin, encoding, decoding
-from functions_refactored import bintostring, stringtobin, encoding, decoding
+# from functions import bintostring, stringtobin, embedding, dembedding
+from functions_refact import bintostring, stringtobin, embedding, dembedding
 
 class Node:
     '''
@@ -99,7 +98,7 @@ def output_encoded(data_in, coding):
     return encoded_string
 
 
-def Huffman_Encoding(data_in):
+def huffman_encoding(data_in):
     '''
     Message compression using the values of each character calculated by the
     Huffman code.
@@ -200,13 +199,13 @@ binarymessage = stringtobin(message)
 squarelength = 8  # square length to be used
 
 # Then we introduce it all to the ENCODING PROCESS
-steg = encoding(im, binarymessage, squarelength)
+steg = embedding(im, binarymessage, squarelength)
 
 # Then we obtain the length in bits of the secret message
 binarymessagelength = len(binarymessage)
 
-# Then we introduce it all to the decoding PROCESS
-secmes, recons = decoding(steg, binarymessagelength, squarelength)
+# Then we introduce it all to the dembedding PROCESS
+secmes, recons = dembedding(steg, binarymessagelength, squarelength)
 
 # We use the 1D-array secmes, to finally unveil the secret message by turning
 # from bin to string
@@ -253,14 +252,14 @@ bitsec = np.unpackbits(secimflat)
 
 squarelength = 8  # square length to be used
 
-# Then we introduce it all to the ENCODING PROCESS
-steg = encoding(im, bitsec, squarelength)
+# Then we introduce it all to the embedding PROCESS
+steg = embedding(im, bitsec, squarelength)
 
 # Then we obtain the length in bits of the secret message
 binarymessagelength = len(bitsec)
 
-# Then we introduce it all to the decoding PROCESS
-secmes, recons = decoding(steg, binarymessagelength, squarelength)
+# Then we introduce it all to the dembedding PROCESS
+secmes, recons = dembedding(steg, binarymessagelength, squarelength)
 
 # Once we obtain the 1D binary array we have to pack again to obtain integers
 # (pixel values)
@@ -317,7 +316,7 @@ print('Num of characters in our message:', len(message))
 
 # ______________________________________________________________________________
 # now we use the huffman encoding
-textcod, huffmantree = Huffman_Encoding(message)
+textcod, huffmantree = huffman_encoding(message)
 # ______________________________________________________________________________
 # Secret image in 1D-array of bits, from str textcod
 binarymessage = np.zeros(len(textcod), dtype='uint8')
@@ -330,14 +329,14 @@ for i in np.arange(binarymessagelength):
 
 squarelength = 8  # square length to be used
 
-# Then we introduce it all to the ENCODING PROCESS
-steg = encoding(im, binarymessage, squarelength)
+# Then we introduce it all to the embedding PROCESS
+steg = embedding(im, binarymessage, squarelength)
 
 # Then we obtain the length in bits of the secret message
 binarymessagelength = len(binarymessage)
 
-# Then we introduce it all to the decoding PROCESS
-secmes, recons = decoding(steg, binarymessagelength, squarelength)
+# Then we introduce it all to the dembedding PROCESS
+secmes, recons = dembedding(steg, binarymessagelength, squarelength)
 
 # create a string from secmes 1D-array to decode thanks to huffman tree
 secmes1 = ''.join(str(i) for i in secmes)
@@ -391,7 +390,7 @@ secimflat = list(secimflat)
 print('Num of bytes in our message:', len(secimflat))
 
 # now we use the huffman encoding
-textcod, huffmantree = Huffman_Encoding(secimflat)
+textcod, huffmantree = huffman_encoding(secimflat)
 # ______________________________________________________________________________
 # Secret image in 1D-array of bits, from str textcod
 bitsec = np.zeros(len(textcod), dtype='uint8')
@@ -405,11 +404,11 @@ for i in np.arange(binarymessagelength):
 
 squarelength = 8  # square length to be used
 
-# Then we introduce it all to the ENCODING PROCESS
-steg = encoding(im, bitsec, squarelength)
+# Then we introduce it all to the embedding PROCESS
+steg = embedding(im, bitsec, squarelength)
 
-# Then we introduce it all to the decoding PROCESS
-secmes, recons = decoding(steg, binarymessagelength, squarelength)
+# Then we introduce it all to the dembedding PROCESS
+secmes, recons = dembedding(steg, binarymessagelength, squarelength)
 
 # create a string from secmes 1D-array to decode thanks to huffman tree
 secmes1 = ''.join(str(i) for i in secmes)
@@ -472,7 +471,7 @@ secimflat = list(secimflat)
 print('Num of bytes in our message:', len(secimflat))
 
 # now we use the huffman encoding
-textcod, huffmantree = Huffman_Encoding(secimflat)
+textcod, huffmantree = huffman_encoding(secimflat)
 # ______________________________________________________________________________
 # Secret image in 1D-array of bits, from str textcod
 bitsec = np.zeros(len(textcod), dtype='uint8')
@@ -496,29 +495,29 @@ squarelength = 8  # square length to be used
 
 
 # R
-# Then we introduce it all to the ENCODING PROCESS
-stegR = encoding(imR, bitsecR, squarelength)
+# Then we introduce it all to the embedding PROCESS
+stegR = embedding(imR, bitsecR, squarelength)
 
-# Then we introduce it all to the decoding PROCESS
-secmes, reconsR = decoding(stegR, binmeslenR, squarelength)
+# Then we introduce it all to the dembedding PROCESS
+secmes, reconsR = dembedding(stegR, binmeslenR, squarelength)
 # create a string from secmes 1D-array to decode thanks to huffman tree
 secmesR = ''.join(str(i) for i in secmes)
 
 # G
-# Then we introduce it all to the ENCODING PROCESS
-stegG = encoding(imG, bitsecG, squarelength)
+# Then we introduce it all to the embedding PROCESS
+stegG = embedding(imG, bitsecG, squarelength)
 
-# Then we introduce it all to the decoding PROCESS
-secmes, reconsG = decoding(stegG, binmeslenG, squarelength)
+# Then we introduce it all to the dembedding PROCESS
+secmes, reconsG = dembedding(stegG, binmeslenG, squarelength)
 # create a string from secmes 1D-array to decode thanks to huffman tree
 secmesG = ''.join(str(i) for i in secmes)
 
 # B
-# Then we introduce it all to the ENCODING PROCESS
-stegB = encoding(imB, bitsecB, squarelength)
+# Then we introduce it all to the embedding PROCESS
+stegB = embedding(imB, bitsecB, squarelength)
 
-# Then we introduce it all to the decoding PROCESS
-secmes, reconsB = decoding(stegB, binmeslenB, squarelength)
+# Then we introduce it all to the dembedding PROCESS
+secmes, reconsB = dembedding(stegB, binmeslenB, squarelength)
 # create a string from secmes 1D-array to decode thanks to huffman tree
 secmesB = ''.join(str(i) for i in secmes)
 

@@ -75,7 +75,7 @@ def calculate_hashfun(temp, ii, sqlen, jj, kk, ll):
     return -1 if len(temp) < 4 else -((ii*sqlen+jj*sqlen+kk+ll) % 3+1)
 
 
-def encoding(im, binmes, sqlen):
+def embedding(im, binmes, sqlen):
     '''
     Perform message embedding process via DCT coefficients into 1-layer image.
 
@@ -112,7 +112,7 @@ def encoding(im, binmes, sqlen):
     # One can also embed a rectangle im, but it means a reshape process
     print(f'Max side length that could have an square image encoded in this\
           cover image and square length: {maxside}\n')
-    # ENCODING PROCESS
+    # EMBEDDING PROCESS
     # Initial variables
     square = np.zeros((sqlen, sqlen))   # Temporary square to apply the dct
     stego = np.zeros((nrow, ncol))      # Final stego image
@@ -154,7 +154,7 @@ def encoding(im, binmes, sqlen):
     return stego
 
 
-def decoding(im, binmes_len, sqlen):
+def dembedding(im, binmes_len, sqlen):
     '''
     Perform message dembedding process via DCT coefficients into 1-layer image.
 
@@ -177,7 +177,7 @@ def decoding(im, binmes_len, sqlen):
     maxbits = np.size(im) * (1. - 1./sqlen)
     check_message_length(maxbits, binmes_len)
     print('Number of bits to be dembedded:', binmes_len)
-    # DECODING PROCESS
+    # DEMBEDDING PROCESS
     # Initial variables
     square = np.zeros((sqlen, sqlen))
     recons = np.zeros((nrow, ncol))

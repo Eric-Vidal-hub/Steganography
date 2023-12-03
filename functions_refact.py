@@ -13,7 +13,7 @@ def bintostring(binmes):
     return ''.join(chars)
 
 
-def encoding(im: np.ndarray, binmes: np.ndarray, sqlen: int) -> np.ndarray:
+def embedding(im: np.ndarray, binmes: np.ndarray, sqlen: int) -> np.ndarray:
     nrow, ncol = np.shape(im)
     stego = np.zeros((nrow, ncol))
     numsecbit = 0
@@ -43,7 +43,7 @@ def encoding(im: np.ndarray, binmes: np.ndarray, sqlen: int) -> np.ndarray:
     return stego
 
 
-def decoding(im, binarymeslen, sqlen):
+def dembedding(im, binarymeslen, sqlen):
     nrow, ncol = np.shape(im)
     recons = np.zeros((nrow, ncol))
     secmes = np.zeros(binarymeslen, dtype='uint8')
