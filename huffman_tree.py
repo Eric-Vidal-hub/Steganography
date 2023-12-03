@@ -1,6 +1,5 @@
+'''Huffman tree implementation for message compression'''
 from collections import Counter
-import numpy as np
-from skimage import data
 
 
 class Node:
@@ -65,6 +64,16 @@ def output_encoded(data_in, coding):
     Retruns(tuple):
         string(str): secret message or image written in huffman code.
         None. Print the bits used before and after compression.
+
+    Example:
+        im = data.camera()  # Secret image
+        im = list(np.uint64(im.flatten()))  # Pre process to binarize
+        textehcod, hufftree = huffman_encoding(im)
+
+        # decod the huffman code of the image
+        textdecod = huffman_decoding(textehcod, hufftree)
+        >>> Bits used before compression: 2097152
+        >>> Bits used after compression: 1903718
     '''
     # Directly join the strings for encoding_output
     encoded_string = ''.join(coding[i] for i in data_in)
@@ -156,12 +165,3 @@ def huffman_decoding(encod_data, huffmantree):
             decoded_output.append(huffmantree.symbol)
             huffmantree = tree_head
     return decoded_output
-
-
-# EXAMPLE
-im = data.camera()  # Secret image
-im = list(np.uint64(im.flatten()))  # Pre process to binarize
-textehcod, hufftree = huffman_encoding(im)
-
-# decod the huffman code of the image
-textdecod = huffman_decoding(textehcod, hufftree)

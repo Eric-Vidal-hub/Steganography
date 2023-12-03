@@ -1,3 +1,4 @@
+'''Functions for the steganography project.'''
 import numpy as np
 from scipy.fftpack import dct, idct
 from skimage.metrics import structural_similarity as ssim
