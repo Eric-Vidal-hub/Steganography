@@ -17,151 +17,97 @@ import numpy as np
 from skimage import data
 from skimage.metrics import structural_similarity as ssim
 from skimage.transform import rescale
+from collections import Counter
 
 from functions import bintostring, stringtobin, encoding, decoding
 # from functions_refactored import bintostring, stringtobin, encoding, decoding
 
 # %% 2. HUFFMAN TREE CODE
-
-# Code to programme the Huffman encoding, which enables us to codify and compress
-# information in binary
-
-# Auxiliar functions which we'll use in static Huffman code:
-# _______________________________________________________________________
-
-# 1 First we have to create a Node which is a class. It will let us to develop
-# a list of nodes but keeping intact all other parameters
-
-# Arguments: left=None and right=None means that if we don't especify the values
-# their default values are None
-
-# Self:We use that command when programe a class variable to refer to the
-# class object itself. It is a way that the program understand that the same
-# node is used and called in the functions
-
-
+# Huffman static encoding: codifying and compressing binary data
 class Node:
-    '''__init__: whenever we call a Node class, the node will apply this
-    function, and we can access to its variables by writing Node.variable'''
-
+    '''__init__ parameters:
+    prob: probability of the node
+    symbol: character or number which characterizes the node.
+    left: node at its left.
+    right: node at its right.
+    code: depending on the direction the tree goes, 0/1 is assigned to the
+    node. Finally, we obtain a binary string that characterizes its symbol.
+    '''
     def __init__(self, prob, symbol, left=None, right=None):
-        # It relates node with character frequencies
         self.prob = prob
-
-        # character or number which characterizes the node
         self.symbol = symbol
-
-        # Saves which node has at its left
         self.left = left
-
-        # Saves which node has at its right
         self.right = right
-
-        # Depending on the direction where we go, we'll introduce a value 0/1
-        # to variable code, at first we give an empty value
-        # Finally we'll obtain the 0/1 chain that characterizes its symbol
         self.code = ''
 
 
-# _______________________________________________________________________
-# 2 Function which will calculate frequencies of each character (symbol)
-# in the message
-
-# We want to save each character frecuency from our message, so
-# the most natural way to do it is using dictionaries
-def calculate_frequency(data):
-    '''Input: Flatten image as a list (no array) or message (str). This 
-    function return the frequency of appearence of each symbol in the data. 
-    Output: dictionary with symbols as a keys and freq as a values'''
-
-    symbols = {}  # dictonary to be returned with values and its frequencies
-    for element in data:
-        # if the element is not in the dictionary yet, it is introduced: freq 1
-        if symbols.get(element) is None:
-            symbols[element] = 1
-        else:
-            symbols[element] += 1  # if it already is sum 1
-    return symbols
+def calculate_frequency(data_in):
+    '''
+    Returns dictionary of characters (symbols) and its frequencies
+    in the message or image.
+    Input:
+        data(list/str): flatten image (NO array) or message.
+    Output:
+        Counter(dict): keys -> symbols & values -> frequencies.
+    '''
+    return Counter(data_in)
 
 
-# _______________________________________________________________________
-# 3 Function that calculate Huffman code of each character
-
-# We will use a dictionary for the same reason as before, now each symbol
-# will be associated with a 0/1 string that characterizes it, previously
-# we have associated its frequency instead
-codes = dict()
-# Every time we run the program, codes dictionary must restart, so that's why we
-# define codes outside the function
-
-# Reminding: we put val=empty by default, because at the beggining the
-# code values of each node are none
+# Definition outside the function to restart variable each time we call it
+codes = {}
 
 
 def calculate_codes(node, val=''):
-    '''Input: class variable node (node) and value given to that note (val)
-    which by default is empty. This function calculate the new binary
-    code given to each symbol of the text. Output: dictionary (codes) with 
-    symbols as keys and the binary code as values'''
-
-    # Value of the Huffman code in the current node. We call the node class
-    # and take its code value and then sum it to the previous ones.
-    newval = val+str(node.code)
-
-    # Iterative function. It explores all possible branches until reach all the
-    # tree leafs.
-    if (node.left):
+    '''
+    We will use a dictionary for the same reason as before, now each symbol
+    will be associated with a 0/1 string that characterizes it, previously
+    we have associated its frequency instead
+    Input:
+        node(class variable): node of the Huffman tree.
+        val(str): binary code of the node.
+            Default: ''. Empty str, because at the beggining the code values
+            of each node are none
+    Output:
+        codes(dict): keys -> symbols & values -> binary code.
+'''
+    newval = val + str(node.code)
+    # Explores all possible branches until reach all the tree leafs.
+    if node.left:
         calculate_codes(node.left, newval)
-    if (node.right):
+    if node.right:
         calculate_codes(node.right, newval)
-
-    # Finally arrive to a leaf
+    # When it arrives to a leaf
     if (not node.left and not node.right):
-        # put the code of the leaf to its corresponding symbol (key of the dict)
+        # Assign the leaf code to its corresponding symbol (dict key)
         codes[node.symbol] = newval
     return codes
 
 
-# _______________________________________________________________________
-# 4 Get the secret message or image write with huffman code
+def output_encoded(data_in, coding):
+    '''
+    Get the secret message or image written in huffman code
+    and compare bits length with and without Huffman tree.
+    Input:
+        data_in(list/str): flatten image (NO array) or message.
+        coding(dict): keys -> symbols & values -> binary code.
+    Output:
+        string(str): secret message or image written in huffman code.
+        None. Print the bits used before and after compression.
+    '''
+    encoding_output = [coding[i] for i in data_in]
+    encoded_string = ''.join([str(item) for item in encoding_output])
 
-def output_encoded(data, coding):
-    '''Input: secret message or image (str/list) and the binary values of each
-    symbol from coding (dict). This function gets the secret message encoded
-    with the huffman code. Output: Huffman encoded message (string)'''
-
-    encoding_output = []
-    # these will be the keys of coding (which are the characters)
-    for i in data:
-        # then we gather the message in Huffman code
-        encoding_output.append(coding[i])
-
-    # take each element of the list and joining in an empty string
-    string = ''.join([str(item) for item in encoding_output])
-    return string
-
-
-# _______________________________________________________________________
-# 5 Function to compare how the secret text or image  has been reduced
-
-def total_gain(data, coding):
-    '''Input:secret message or image (str/list) and the binary values of each
-    symbol (coding, dict).This function calculate the length of the message
-    without compressing and with Huffman tree method. Output: it doesnt return
-    any variable, it directly prints the both lengths to compare'''
-    # each character of the text or image are 8 bits, so the length is the
-    # number of charachters multiplied by 8
-    before_compression = len(data)*8
+    # each text character or pixel image is 8 bits length
+    before_compression = len(data_in)*8
     after_compression = 0
-
-    # count how many times appears the carachter in the message and multiply
-    # by the length of huffman code
     symbols = coding.keys()
     for i in symbols:
-        count = data.count(i)
+        count = data_in.count(i)
         after_compression += count*len(coding[i])
     print('Bits used before compression:', before_compression)
     print('Bits used after compression:', after_compression)
+
+    return encoded_string
 
 # _______________________________________________________________________
 #                               HUFFMAN TREE
@@ -225,9 +171,6 @@ def Huffman_Encoding(data):
     # We start from the top and go down with the auxiliar function 3, so we get
     # the huffman code of each character
     huffman_coding = calculate_codes(nodes[0])
-
-    # calculate the total gain
-    total_gain(data, huffman_coding)
 
     # final string with encoded text
     coded_output = output_encoded(data, huffman_coding)
