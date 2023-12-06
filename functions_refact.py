@@ -1,4 +1,5 @@
-'''Functions for the steganography project. Refactored from the original.'''
+'''Functions for the steganography project. Refactored from the original
+for being simplified and understand better the procedure.'''
 import numpy as np
 from scipy.fftpack import dct, idct
 

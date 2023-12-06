@@ -46,6 +46,17 @@ def bintostring(binmes):
 
 
 def check_image_dimensions(nrow, ncol, sqlen):
+    """
+    Check if the image dimensions are compatible with the square length.
+
+    Args:
+        nrow (int): The number of rows in the image.
+        ncol (int): The number of columns in the image.
+        sqlen (int): The length of the square.
+
+    Raises:
+        ValueError: If the square length does not fit the image dimensions.
+    """
     if nrow % sqlen != 0 or ncol % sqlen != 0:
         raise ValueError("Square length doesn't fit image dimensions")
 
@@ -68,11 +79,23 @@ def check_message_length(maxbits, binmes_len):
         check_message_length(maxbits, binmes_len)
     """
     if maxbits < binmes_len:
-        raise ValueError('Number of bits to be embedded exceeds capacity of\
-                         image')
+        raise ValueError('Number of bits to be embedded exceeds im capacity')
 
 
 def calculate_hashfun(temp, ii, sqlen, jj, kk, ll):
+    """ Calculate the hash function value.
+
+Args:
+    temp (str): The input string.
+    ii (int): The first parameter.
+    sqlen (int): The length of the string.
+    jj (int): The second parameter.
+    kk (int): The third parameter.
+    ll (int): The fourth parameter.
+
+Returns:
+    int: The hash function value.
+"""
     return -1 if len(temp) < 4 else -((ii*sqlen+jj*sqlen+kk+ll) % 3+1)
 
 
@@ -104,15 +127,14 @@ def embedding(im, binmes, sqlen):
     maxbits = np.size(im) * (1. - 1./sqlen)
     maxbytes = maxbits / 8.  # A byte can either be a pixel or a character
     check_message_length(maxbits, binmes_len)
+    print('\nENCODING PROCESS')
     print('Number of bits to be embedded:', binmes_len)
     print('Max num of bits that can be embedded:', maxbits)
-    print('Max num of bytes that can be encoded in this cover image and square\
-          length:', maxbytes)
+    print('Max num of bytes that can be embedded:', maxbytes)
     # Orientative value of max side length of largest square image embedable
     maxside = np.uint8(np.sqrt(maxbytes))
     # One can also embed a rectangle im, but it means a reshape process
-    print(f'Max side length that could have an square image encoded in this\
-          cover image and square length: {maxside}\n')
+    print('Max sqr side length that can be embedded:', maxside)
     # EMBEDDING PROCESS
     # Initial variables
     square = np.zeros((sqlen, sqlen))   # Temporary square to apply the dct
@@ -148,10 +170,10 @@ def embedding(im, binmes, sqlen):
                           norm='ortho')  # IDCT
             # Construct the stego image by filling the squares
             stego[ii*sqlen:(ii+1)*sqlen, jj*sqlen:(jj+1)*sqlen] = square[:, :]
-    # Sanity checks
-    print('Num of bits encoded:', numsecbit)
-    enc_ssim = ssim(np.double(im), np.double(stego), data_range=255.0)
-    print('The SSIM comparing Cover Im and Stego Im is: %.8f' % (enc_ssim))
+    print('Number of bits encoded:', numsecbit)     # Sanity check
+    enc_ssim = ssim(np.double(im), np.double(stego), data_range=np.max(stego)
+                    - np.min(stego))
+    print('The SSIM comparing Cover Im and Stego Im is: %.8f\n' % (enc_ssim))
     return stego
 
 
@@ -177,6 +199,7 @@ def dembedding(im, binmes_len, sqlen):
     check_image_dimensions(nrow, ncol, sqlen)
     maxbits = np.size(im) * (1. - 1./sqlen)
     check_message_length(maxbits, binmes_len)
+    print('\nDECODING PROCESS')
     print('Number of bits to be dembedded:', binmes_len)
     # DEMBEDDING PROCESS
     # Initial variables
@@ -202,7 +225,9 @@ def dembedding(im, binmes_len, sqlen):
             square = idct(idct(square, axis=0, norm='ortho'), axis=1,
                           norm='ortho')
             recons[ii*sqlen:(ii+1)*sqlen, jj*sqlen:(jj+1)*sqlen] = square[:, :]
+    # Sanity checks
     print('Num of bits decoded:', numsecbit)
-    dec_ssim = ssim(np.double(im), np.double(recons), data_range=255.0)
-    print('The SSIM comparing Cover Im and Stego Im is: %.8f' % dec_ssim)
+    dec_ssim = ssim(np.double(im), np.double(recons), data_range=np.max(recons)
+                    - np.min(recons))
+    print('The SSIM comparing Stego Im and Recons Im is: %.8f\n' % dec_ssim)
     return secmes, recons

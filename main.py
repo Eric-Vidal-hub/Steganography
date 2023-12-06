@@ -22,8 +22,8 @@ import numpy as np
 from skimage import data
 from skimage.metrics import structural_similarity as ssim
 from skimage.transform import rescale
-# from functions import embedding, dembedding
-from functions_refact import embedding, dembedding
+from functions import embedding, dembedding
+# from functions_refact import embedding, dembedding
 from huffman_tree import huffman_encoding, huffman_decoding
 
 
@@ -31,7 +31,8 @@ print('\nEXAMPLES OF DCT STEGANOGRAPHY WITH HUFFMAN ENCODING\n')
 print('1. CHARACTERS STRING')
 im = data.camera()  # Cover image
 MESSAGE = 'Steganography among other rare disciplines is honored to be ' \
-          'described as both an art and Science field.'     # Secret message
+          'described as both an art and Science field.'
+print('Secret message:', MESSAGE)
 print('Num of characters in our message:', len(MESSAGE))
 encod_text, huffmanhead = huffman_encoding(MESSAGE)
 binarymessage = np.array([int(i) for i in encod_text], dtype='uint8')
@@ -69,7 +70,7 @@ im = 0.299 * im[:, :, 0] + 0.587 * \
     im[:, :, 1] + 0.114 * im[:, :, 2]  # Luminance
 secim = rescale(data.camera(), 0.3, anti_aliasing=False)    # Secret image
 # This is the maximum factor of scale that we can hide 0.34
-# So the next step will be hiding the whole image in a RGB cover image
+# So the next step will be hiding a bit more in a RGB cover image
 
 secimflat = list(np.uint64((secim*255).flatten()))
 print('Num of pixels (bytes) in our message:', len(secimflat))
@@ -126,7 +127,6 @@ plt.show()
 print('3. SECRET IMAGE WITH RGB COVER')
 im = data.astronaut()   # Cover image
 secim = rescale(data.camera(), 0.5, anti_aliasing=False)    # Secret image
-
 secimflat = list(np.uint64((secim*255).flatten()))
 print('Num of pixels (bytes) in our message:', len(secimflat))
 encod_text, huffmanhead = huffman_encoding(secimflat)
@@ -144,6 +144,7 @@ SECMES_FULL = []
 
 _, _, layers = im.shape
 for i in range(layers):
+    print(f'Layer {i+1} of {layers}')
     im_part = im[:, :, i]
     bitsec_part = bitsec_parts[i]
     binmeslen_part = len(bitsec_part)

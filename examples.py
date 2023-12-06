@@ -1,18 +1,20 @@
-"""Examples of DCT Steganography without encoding for string
-and image as secret messages."""
+"""Examples of DCT Steganography without encoding for string and image as
+secret messages. As there is no encoding process might be easier to follow the
+embedding and dembedding processes."""
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage import data
 from skimage.metrics import structural_similarity as ssim
 from skimage.transform import rescale
-# from functions import bintostring, stringtobin, embedding, dembedding
-from functions_refact import bintostring, stringtobin, embedding, dembedding
+from functions import bintostring, stringtobin, embedding, dembedding
+# from functions_refact import bintostring, stringtobin, embedding, dembedding
 
 print('\nEXAMPLES OF DCT STEGANOGRAPHY WITHOUT ENCODING\n')
 print('1. CHARACTERS STRING')
 im = data.camera()  # Cover image
 MESSAGE = 'Steganography among other rare disciplines is honored to be ' \
-          'described as both an art and Science field.'     # Secret message
+          'described as both an art and Science field.'
+print('Secret message:', MESSAGE)
 print('Num of characters in our message:', len(MESSAGE))
 binarymessage = stringtobin(MESSAGE)
 
