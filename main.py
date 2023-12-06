@@ -1,21 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: Eric Vidal Marcos
-@supervisor: Dr. Aurelien Coillet
 @python version: 3.10.10 64-bits
-@title: DCT Steganography
-@description: This code is a Steganography method based on DCT transform. It
-allows to hide a secret bitstring (e.g. message or image) into a cover image.
-This is then encoded with Huffman encoding to reduce the size of the message.
-Then, the secret is embedded using a hash function in the DCT coefficients of
-the cover image. So we have a stego image. The receiver will use the same hash
-function to extract the secret message from the stego image. Finally, the
-secret message is decoded with Huffman decoding to recover the original secret.
-
-In this code, we have 3 examples:
-    1. Characters string
-    2. Secret image
-    3. Secret image with RGB cover image
 """
 import matplotlib.pyplot as plt
 import numpy as np
